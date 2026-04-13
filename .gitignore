@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+web/dist/
+server/bin/
+server/server
+*.exe
+
+# Database (local)
+server/data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.local
+
+# Uploads (development)
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Worktrees
+.worktrees/
+
+# Superpowers planning docs (exclude internal design/plan files)
+docs/superpowers/
+
+# Claude worktrees and cache
+.claude/
