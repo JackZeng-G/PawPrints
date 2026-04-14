@@ -31,6 +31,14 @@ func NewApp() *App {
 		panic("failed to connect database: " + err.Error())
 	}
 
+	if err := Migrate(db); err != nil {
+		panic("failed to migrate database: " + err.Error())
+	}
+
+	if err := Seed(db); err != nil {
+		panic("failed to seed database: " + err.Error())
+	}
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
