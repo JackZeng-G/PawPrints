@@ -1,0 +1,18 @@
+services:
+  pawprints:
+    image: pawprints:latest
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - pawprints-uploads:/app/uploads
+      - pawprints-db:/app/data
+    environment:
+      - TZ=Asia/Shanghai
+      - PAWPRINTS_DB_PATH=/app/data/pawprints.db
+      - PAWPRINTS_UPLOAD_DIR=/app/uploads
+    restart: unless-stopped
+
+volumes:
+  pawprints-uploads:
+  pawprints-db:
