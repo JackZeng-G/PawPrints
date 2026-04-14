@@ -1,0 +1,1 @@
+import{t as e}from"./http-DAB4qHPc.js";var t={list:(t,n,r=1,i=20)=>e.get(`/health`,{params:{pet_id:t,type:n,page:r,page_size:i}}),create:t=>e.post(`/health`,t),update:(t,n)=>e.put(`/health/${t}`,n),delete:t=>e.delete(`/health/${t}`),weightChart:t=>e.get(`/health/${t}/weight-chart`),upcoming:t=>e.get(`/health/${t}/upcoming`)};export{t};

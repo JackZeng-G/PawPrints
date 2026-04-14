@@ -23,6 +23,12 @@
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
     </div>
 
+    <!-- Weight Chart -->
+    <div v-if="filterType === 'weight' && weightData.length > 1" class="bg-white rounded-2xl shadow-sm p-4">
+      <h3 class="text-sm font-medium text-gray-500 mb-3">体重趋势</h3>
+      <div ref="chartRef" style="width: 100%; height: 280px;"></div>
+    </div>
+
     <div v-else class="space-y-3">
       <div v-for="record in filteredRecords" :key="record.id" class="bg-white rounded-lg shadow p-4 flex items-center justify-between">
         <div>
@@ -70,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { healthApi } from '../../api/health'
 
@@ -94,6 +100,31 @@ const form = ref<any>({
   type: 'vaccine', title: '', record_date: new Date().toISOString().split('T')[0],
   value: null, unit: '', vet_name: '', notes: '',
 })
+
+const chartRef = ref<HTMLDivElement | null>(null)
+const weightData = ref<{ date: string; value: number }[]>([])
+let chart: any = null
+
+const initChart = async () => {
+  if (!chartRef.value || weightData.value.length < 2) return
+  const echarts = await import('echarts')
+  if (!chart) chart = echarts.init(chartRef.value)
+  const option = {
+    grid: { left: 40, right: 20, top: 20, bottom: 30 },
+    xAxis: { type: 'category', data: weightData.value.map(d => d.date), axisLine: { lineStyle: { color: '#e5e7eb' } }, axisLabel: { color: '#9ca3af' } },
+    yAxis: { type: 'value', name: 'kg', splitLine: { lineStyle: { color: '#f3f4f6' } }, axisLabel: { color: '#9ca3af' } },
+    series: [{
+      type: 'line',
+      data: weightData.value.map(d => d.value),
+      smooth: true,
+      lineStyle: { color: '#3b82f6', width: 3 },
+      itemStyle: { color: '#3b82f6' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(59, 130, 246, 0.3)' }, { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }] } },
+    }],
+    tooltip: { trigger: 'axis', formatter: (p: any) => `${p[0].name}<br/>体重: ${p[0].value} kg` },
+  }
+  chart.setOption(option)
+}
 
 const filteredRecords = computed(() => {
   if (!filterType.value) return records.value
@@ -135,11 +166,27 @@ const deleteRecord = async (id: number) => {
   await loadRecords()
 }
 
+watch(filterType, async () => {
+  if (filterType.value === 'weight' && weightData.value.length > 1) {
+    await nextTick()
+    initChart()
+  }
+})
+
 const loadRecords = async () => {
   loading.value = true
   try {
     const { data } = await healthApi.list(petId.value)
     records.value = data.data || data
+    // Extract weight data for chart
+    weightData.value = records.value
+      .filter((r: any) => r.type === 'weight' && r.value)
+      .map((r: any) => ({ date: r.record_date, value: r.value }))
+      .sort((a: any, b: any) => String(a.date).localeCompare(String(b.date)))
+    if (filterType.value === 'weight' && weightData.value.length > 1) {
+      await nextTick()
+      initChart()
+    }
   } finally {
     loading.value = false
   }

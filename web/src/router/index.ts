@@ -13,6 +13,7 @@ const router = createRouter({
     { path: '/diaries/:id', name: 'diary-detail', component: () => import('../views/diary/DiaryDetailView.vue') },
     { path: '/diaries/:id/edit', name: 'diary-edit', component: () => import('../views/diary/DiaryFormView.vue') },
     { path: '/health/:petId', name: 'health', component: () => import('../views/health/HealthView.vue') },
+    { path: '/gallery', name: 'gallery', component: () => import('../views/gallery/GalleryView.vue') },
     { path: '/reminders', name: 'reminders', component: () => import('../views/reminder/ReminderView.vue') },
     { path: '/settings', name: 'settings', component: () => import('../views/settings/SettingsView.vue') },
   ],

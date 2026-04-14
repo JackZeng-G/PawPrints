@@ -50,13 +50,7 @@
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">照片</label>
-        <input type="file" accept="image/*" multiple @change="handlePhotos" class="w-full text-sm text-gray-500" />
-        <div v-if="form.photos?.length" class="flex gap-2 mt-2">
-          <div v-for="(photo, i) in form.photos" :key="i" class="relative">
-            <img :src="photo.photo_url" class="w-16 h-16 rounded object-cover" />
-            <button type="button" @click="form.photos?.splice(i, 1)" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">x</button>
-          </div>
-        </div>
+        <ImageUploader :photos="form.photos" @remove="(i: number) => form.photos?.splice(i, 1)" @photos-added="addPhotos" />
       </div>
 
       <div class="flex justify-end gap-3 pt-4">
@@ -74,7 +68,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDiaryStore } from '../../stores/diary'
 import { usePetStore } from '../../stores/pet'
-import { uploadApi } from '../../api/common'
+import ImageUploader from '../../components/ImageUploader.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -93,13 +87,8 @@ const form = ref<any>({
   photos: [] as { photo_url: string; thumbnail_url: string }[],
 })
 
-const handlePhotos = async (e: Event) => {
-  const files = (e.target as HTMLInputElement).files
-  if (!files) return
-  for (const file of Array.from(files)) {
-    const result = await uploadApi.upload(file)
-    form.value.photos.push({ photo_url: result.url, thumbnail_url: result.thumbnail_url })
-  }
+const addPhotos = (newPhotos: { photo_url: string; thumbnail_url: string }[]) => {
+  form.value.photos.push(...newPhotos)
 }
 
 const handleSubmit = async () => {

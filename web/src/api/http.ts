@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { emitter } from '../utils/emitter'
 
 const http = axios.create({
   baseURL: '/api',
@@ -8,7 +9,8 @@ const http = axios.create({
 http.interceptors.response.use(
   (res) => res,
   (err) => {
-    console.error('API Error:', err.response?.data || err.message)
+    const msg = err.response?.data?.error || err.message || '请求失败'
+    emitter.emit('toast', { type: 'error', message: msg })
     return Promise.reject(err)
   }
 )
