@@ -1,0 +1,12 @@
+.git
+.gitignore
+*.md
+docs/
+.claude/
+web/node_modules/
+web/dist/
+server/tests/
+*.test.go
+data/
+uploads/
+pawprints
