@@ -68,4 +68,15 @@ func Setup(r *gin.Engine, db *gorm.DB) {
 	r.GET("/api/upload/*filepath", func(c *gin.Context) {
 		c.File(cfg.Server.UploadDir + c.Param("filepath"))
 	})
+
+	// 统计
+	statsHandler := handler.NewStatsHandler(db, cfg)
+	r.GET("/api/stats/overview", statsHandler.Overview)
+	r.GET("/api/stats/timeline", statsHandler.Timeline)
+	r.GET("/api/data/export", statsHandler.Export)
+	r.GET("/api/data/backup", statsHandler.Backup)
+
+	// 数据导入
+	dataHandler := handler.NewDataHandler(db)
+	r.POST("/api/data/import", dataHandler.Import)
 }

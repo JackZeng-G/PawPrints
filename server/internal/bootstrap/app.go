@@ -7,6 +7,7 @@ import (
 
 	"pawprints-server/internal/config"
 	"pawprints-server/internal/router"
+	"pawprints-server/pkg/embedfs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
@@ -44,6 +45,9 @@ func NewApp() *App {
 	r.Use(gin.Recovery())
 
 	router.Setup(r, db)
+
+	// 嵌入前端 SPA
+	embedfs.Register(r)
 
 	return &App{
 		Config: cfg,
