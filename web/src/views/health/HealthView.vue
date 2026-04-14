@@ -1,77 +1,115 @@
 <template>
   <div class="space-y-6">
+    <!-- Header -->
     <div class="flex items-center gap-4">
-      <router-link to="/pets" class="text-gray-500 hover:text-gray-700">&larr; 返回宠物</router-link>
+      <router-link to="/pets" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        <ChevronLeft class="w-4 h-4" /> 返回宠物
+      </router-link>
       <h1 class="text-2xl font-bold text-gray-800">健康记录</h1>
     </div>
 
-    <div class="flex items-center justify-between">
-      <div class="flex gap-2">
-        <button
-          v-for="t in types"
-          :key="t.value"
-          @click="filterType = t.value"
-          :class="['px-4 py-2 rounded-lg', filterType === t.value ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600']"
+    <!-- Filter & Action -->
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex gap-2 bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm flex-1">
+        <button v-for="t in types" :key="t.value" @click="filterType = t.value"
+          class="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          :class="filterType === t.value ? 'bg-blue-500 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
         >{{ t.label }}</button>
       </div>
-      <button @click="showForm = true" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-        + 添加记录
+      <button @click="showForm = true"
+        class="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2.5 rounded-xl hover:bg-blue-600 active:scale-[0.98] transition-all duration-200 shadow-sm shadow-blue-500/20 font-medium text-sm flex-shrink-0">
+        <Plus class="w-4 h-4" /> 添加
       </button>
     </div>
 
-    <div v-if="loading" class="text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+    <!-- Loading -->
+    <div v-if="loading" class="flex flex-col items-center py-16 gap-4">
+      <div class="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+      <p class="text-sm text-gray-400">加载中...</p>
     </div>
 
-    <!-- Weight Chart -->
-    <div v-if="filterType === 'weight' && weightData.length > 1" class="bg-white rounded-2xl shadow-sm p-4">
-      <h3 class="text-sm font-medium text-gray-500 mb-3">体重趋势</h3>
-      <div ref="chartRef" style="width: 100%; height: 280px;"></div>
-    </div>
+    <template v-else>
+      <!-- Weight Chart -->
+      <div v-if="filterType === 'weight' && weightData.length > 1" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="text-sm font-medium text-gray-500 mb-4 flex items-center gap-2">
+          <TrendingUp class="w-4 h-4 text-blue-500" /> 体重趋势
+        </h3>
+        <div ref="chartRef" style="width: 100%; height: 280px;"></div>
+      </div>
 
-    <div v-else class="space-y-3">
-      <div v-for="record in filteredRecords" :key="record.id" class="bg-white rounded-lg shadow p-4 flex items-center justify-between">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-medium text-gray-800">{{ record.title }}</span>
-            <span class="text-xs bg-gray-100 px-2 py-1 rounded">{{ typeLabel(record.type) }}</span>
+      <!-- Records List -->
+      <div v-if="filteredRecords.length === 0" class="flex flex-col items-center py-16 text-center">
+        <Activity class="w-12 h-12 text-gray-200 mb-4" />
+        <p class="text-gray-500 mb-1">暂无记录</p>
+        <p class="text-sm text-gray-400">点击上方按钮添加健康记录</p>
+      </div>
+
+      <div v-else class="space-y-3">
+        <div v-for="record in filteredRecords" :key="record.id"
+          class="bg-white rounded-2xl border border-gray-100 p-4 flex items-center justify-between hover:shadow-sm transition-shadow duration-200">
+          <div class="flex items-start gap-3">
+            <div :class="['w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', typeBgClass(record.type)]">
+              <component :is="typeIcon(record.type)" class="w-5 h-5" :class="typeTextClass(record.type)" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-800">{{ record.title }}</span>
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-md">{{ typeLabel(record.type) }}</span>
+              </div>
+              <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
+                <span>{{ record.record_date }}</span>
+                <span v-if="record.value" class="bg-gray-50 px-2 py-0.5 rounded-md text-gray-600">{{ record.value }} {{ record.unit }}</span>
+              </div>
+              <div v-if="record.notes" class="text-sm text-gray-400 mt-1">{{ record.notes }}</div>
+            </div>
           </div>
-          <div class="text-sm text-gray-500 mt-1">{{ record.record_date }} {{ record.value ? `· ${record.value} ${record.unit}` : '' }}</div>
-          <div v-if="record.notes" class="text-sm text-gray-400 mt-1">{{ record.notes }}</div>
-        </div>
-        <div class="flex gap-2">
-          <button @click="editRecord(record)" class="text-blue-500 text-sm hover:underline">编辑</button>
-          <button @click="deleteRecord(record.id)" class="text-red-500 text-sm hover:underline">删除</button>
+          <div class="flex gap-1">
+            <button @click="editRecord(record)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200">
+              <Pencil class="w-4 h-4" />
+            </button>
+            <button @click="deleteRecord(record.id)" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200">
+              <Trash2 class="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
-      <div v-if="filteredRecords.length === 0" class="text-center py-8 text-gray-500">暂无记录</div>
-    </div>
+    </template>
 
-    <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md space-y-4">
-        <h2 class="text-lg font-bold">{{ editing ? '编辑记录' : '添加记录' }}</h2>
-        <form @submit.prevent="handleSubmit" class="space-y-3">
-          <select v-model="form.type" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
-            <option value="vaccine">疫苗</option>
-            <option value="deworming">驱虫</option>
-            <option value="weight">体重</option>
-            <option value="medical">就医</option>
-          </select>
-          <input v-model="form.title" type="text" required placeholder="标题" class="w-full border border-gray-300 rounded-lg px-4 py-2" />
-          <input v-model="form.record_date" type="date" required class="w-full border border-gray-300 rounded-lg px-4 py-2" />
-          <div class="grid grid-cols-2 gap-3">
-            <input v-model.number="form.value" type="number" step="0.1" placeholder="数值" class="border border-gray-300 rounded-lg px-4 py-2" />
-            <input v-model="form.unit" type="text" placeholder="单位" class="border border-gray-300 rounded-lg px-4 py-2" />
+    <!-- Form Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="showForm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="closeForm">
+          <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 class="text-lg font-bold text-gray-800">{{ editing ? '编辑记录' : '添加记录' }}</h2>
+              <button @click="closeForm" class="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                <X class="w-5 h-5" />
+              </button>
+            </div>
+            <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
+              <select v-model="form.type" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                <option value="vaccine">疫苗</option>
+                <option value="deworming">驱虫</option>
+                <option value="weight">体重</option>
+                <option value="medical">就医</option>
+              </select>
+              <input v-model="form.title" type="text" required placeholder="标题" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+              <input v-model="form.record_date" type="date" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+              <div class="grid grid-cols-2 gap-3">
+                <input v-model.number="form.value" type="number" step="0.1" placeholder="数值" class="border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                <input v-model="form.unit" type="text" placeholder="单位" class="border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+              </div>
+              <input v-model="form.vet_name" type="text" placeholder="兽医" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+              <textarea v-model="form.notes" rows="2" placeholder="备注" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"></textarea>
+              <div class="flex justify-end gap-3 pt-2">
+                <button type="button" @click="closeForm" class="px-5 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 font-medium text-sm transition-all">取消</button>
+                <button type="submit" class="px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-medium text-sm shadow-sm shadow-blue-500/20 transition-all">保存</button>
+              </div>
+            </form>
           </div>
-          <input v-model="form.vet_name" type="text" placeholder="兽医" class="w-full border border-gray-300 rounded-lg px-4 py-2" />
-          <textarea v-model="form.notes" rows="2" placeholder="备注" class="w-full border border-gray-300 rounded-lg px-4 py-2"></textarea>
-          <div class="flex justify-end gap-3">
-            <button type="button" @click="closeForm" class="px-4 py-2 border border-gray-300 rounded-lg">取消</button>
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">保存</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -79,6 +117,10 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { healthApi } from '../../api/health'
+import {
+  ChevronLeft, Plus, TrendingUp, Activity, Syringe, ShieldCheck, Scale, Stethoscope,
+  Pencil, Trash2, X
+} from 'lucide-vue-next'
 
 const route = useRoute()
 const petId = computed(() => Number(route.params.petId))
@@ -105,6 +147,26 @@ const chartRef = ref<HTMLDivElement | null>(null)
 const weightData = ref<{ date: string; value: number }[]>([])
 let chart: any = null
 
+const typeLabel = (type: string) => {
+  const map: Record<string, string> = { vaccine: '疫苗', deworming: '驱虫', weight: '体重', medical: '就医' }
+  return map[type] || type
+}
+
+const typeIcon = (type: string) => {
+  const map: Record<string, any> = { vaccine: Syringe, deworming: ShieldCheck, weight: Scale, medical: Stethoscope }
+  return map[type] || Activity
+}
+
+const typeBgClass = (type: string) => {
+  const map: Record<string, string> = { vaccine: 'bg-green-50', deworming: 'bg-purple-50', weight: 'bg-blue-50', medical: 'bg-red-50' }
+  return map[type] || 'bg-gray-50'
+}
+
+const typeTextClass = (type: string) => {
+  const map: Record<string, string> = { vaccine: 'text-green-500', deworming: 'text-purple-500', weight: 'text-blue-500', medical: 'text-red-500' }
+  return map[type] || 'text-gray-500'
+}
+
 const initChart = async () => {
   if (!chartRef.value || weightData.value.length < 2) return
   const echarts = await import('echarts')
@@ -130,11 +192,6 @@ const filteredRecords = computed(() => {
   if (!filterType.value) return records.value
   return records.value.filter((r: any) => r.type === filterType.value)
 })
-
-const typeLabel = (type: string) => {
-  const map: Record<string, string> = { vaccine: '疫苗', deworming: '驱虫', weight: '体重', medical: '就医' }
-  return map[type] || type
-}
 
 const editRecord = (record: any) => {
   editing.value = record.id
@@ -178,7 +235,6 @@ const loadRecords = async () => {
   try {
     const { data } = await healthApi.list(petId.value)
     records.value = data.data || data
-    // Extract weight data for chart
     weightData.value = records.value
       .filter((r: any) => r.type === 'weight' && r.value)
       .map((r: any) => ({ date: r.record_date, value: r.value }))
@@ -194,3 +250,12 @@ const loadRecords = async () => {
 
 onMounted(loadRecords)
 </script>
+
+<style scoped>
+.modal-enter-active { transition: all 0.3s ease-out; }
+.modal-leave-active { transition: all 0.2s ease-in; }
+.modal-enter-from { opacity: 0; }
+.modal-leave-to { opacity: 0; }
+.modal-enter-from > div { transform: scale(0.95) translateY(10px); }
+.modal-leave-to > div { transform: scale(0.95) translateY(10px); }
+</style>

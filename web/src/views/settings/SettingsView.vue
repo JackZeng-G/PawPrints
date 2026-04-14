@@ -2,32 +2,74 @@
   <div class="max-w-2xl mx-auto space-y-6">
     <h1 class="text-2xl font-bold text-gray-800">设置</h1>
 
-    <div class="bg-white rounded-lg shadow p-6 space-y-6">
-      <div>
-        <h2 class="text-lg font-bold text-gray-800 mb-3">数据管理</h2>
-        <div class="space-y-3">
-          <button @click="handleExport" class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between">
-            <span>导出数据 (JSON)</span>
-            <span class="text-gray-400">&rarr;</span>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <!-- Data Management -->
+      <div class="p-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Database class="w-5 h-5 text-gray-400" /> 数据管理
+        </h2>
+        <div class="space-y-2">
+          <button @click="handleExport"
+            class="w-full flex items-center justify-between px-4 py-3.5 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-gray-200 transition-all duration-200 group"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Download class="w-4 h-4 text-blue-500" />
+              </div>
+              <div class="text-left">
+                <div class="text-sm font-medium text-gray-700">导出数据</div>
+                <div class="text-xs text-gray-400">JSON 格式</div>
+              </div>
+            </div>
+            <ChevronRight class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors" />
           </button>
-          <button @click="handleBackup" class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between">
-            <span>备份数据库 (SQLite)</span>
-            <span class="text-gray-400">&rarr;</span>
+
+          <button @click="handleBackup"
+            class="w-full flex items-center justify-between px-4 py-3.5 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-gray-200 transition-all duration-200 group"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center">
+                <HardDrive class="w-4 h-4 text-green-500" />
+              </div>
+              <div class="text-left">
+                <div class="text-sm font-medium text-gray-700">备份数据库</div>
+                <div class="text-xs text-gray-400">SQLite 格式</div>
+              </div>
+            </div>
+            <ChevronRight class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors" />
           </button>
-          <div>
-            <label class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between cursor-pointer">
-              <span>导入数据</span>
-              <span class="text-gray-400">&rarr;</span>
-              <input type="file" accept=".json" @change="handleImport" class="hidden" />
-            </label>
-          </div>
+
+          <label class="w-full flex items-center justify-between px-4 py-3.5 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-gray-200 transition-all duration-200 group cursor-pointer"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center">
+                <Upload class="w-4 h-4 text-amber-500" />
+              </div>
+              <div class="text-left">
+                <div class="text-sm font-medium text-gray-700">导入数据</div>
+                <div class="text-xs text-gray-400">从 JSON 文件恢复</div>
+              </div>
+            </div>
+            <ChevronRight class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors" />
+            <input type="file" accept=".json" @change="handleImport" class="hidden" />
+          </label>
         </div>
       </div>
 
-      <div class="border-t pt-6">
-        <h2 class="text-lg font-bold text-gray-800 mb-3">关于</h2>
-        <p class="text-gray-600">萌宠档案馆 v1.0</p>
-        <p class="text-sm text-gray-400 mt-1">记录宠物的每一个美好瞬间</p>
+      <!-- About -->
+      <div class="border-t border-gray-100 p-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+          <Info class="w-5 h-5 text-gray-400" /> 关于
+        </h2>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+            <PawPrint class="w-5 h-5 text-orange-500" />
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">萌宠档案馆</p>
+            <p class="text-xs text-gray-400">v1.0 · 记录宠物的每一个美好瞬间</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -35,6 +77,7 @@
 
 <script setup lang="ts">
 import { dataApi } from '../../api/common'
+import { Database, Download, HardDrive, Upload, ChevronRight, Info, PawPrint } from 'lucide-vue-next'
 
 const handleExport = async () => {
   const { data } = await dataApi.export()
