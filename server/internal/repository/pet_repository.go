@@ -50,11 +50,36 @@ func (r *PetRepository) Delete(id uint) error {
 }
 
 func (r *PetRepository) GetPhotos(petID uint) ([]model.DiaryPhoto, error) {
-	var photos []model.DiaryPhoto
+	type photoRow struct {
+		ID           uint   `gorm:"primaryKey"`
+		DiaryEntryID uint   `gorm:"column:diary_entry_id"`
+		PhotoURL     string `gorm:"column:photo_url"`
+		ThumbnailURL string `gorm:"column:thumbnail_url"`
+		SortOrder    int    `gorm:"column:sort_order"`
+		EntryDate    string `gorm:"column:entry_date"`
+	}
+	var rows []photoRow
 	err := r.DB.Raw(`
-		SELECT dp.* FROM diary_photos dp
+		SELECT dp.id, dp.diary_entry_id, dp.photo_url, dp.thumbnail_url, dp.sort_order,
+		       de.entry_date
+		FROM diary_photos dp
 		JOIN diary_pets dpet ON dp.diary_entry_id = dpet.diary_entry_id
+		JOIN diary_entries de ON dp.diary_entry_id = de.id
 		WHERE dpet.pet_id = ?
-		ORDER BY dp.sort_order`, petID).Scan(&photos).Error
-	return photos, err
+		ORDER BY dp.sort_order`, petID).Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	photos := make([]model.DiaryPhoto, len(rows))
+	for i, row := range rows {
+		photos[i] = model.DiaryPhoto{
+			ID:           row.ID,
+			DiaryEntryID: row.DiaryEntryID,
+			PhotoURL:     row.PhotoURL,
+			ThumbnailURL: row.ThumbnailURL,
+			SortOrder:    row.SortOrder,
+			EntryDate:    row.EntryDate,
+		}
+	}
+	return photos, nil
 }

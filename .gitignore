@@ -44,3 +44,12 @@ docs/superpowers/
 
 # Claude worktrees and cache
 .claude/
+
+# Spec workflow
+.specs/
+
+# Database
+data/
+
+# Test images
+守宫成长/

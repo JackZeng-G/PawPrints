@@ -22,11 +22,29 @@ func (s *PetService) GetByID(id uint) (*model.Pet, error) {
 }
 
 func (s *PetService) Create(pet *model.Pet) error {
-	return s.Repo.Create(pet)
+	if err := s.Repo.Create(pet); err != nil {
+		return err
+	}
+	// 重新加载以包含关联数据
+	loaded, err := s.Repo.GetByID(pet.ID)
+	if err != nil {
+		return nil // 创建已成功，仅加载失败
+	}
+	*pet = *loaded
+	return nil
 }
 
 func (s *PetService) Update(pet *model.Pet) error {
-	return s.Repo.Update(pet)
+	if err := s.Repo.Update(pet); err != nil {
+		return err
+	}
+	// 重新加载以包含关联数据
+	loaded, err := s.Repo.GetByID(pet.ID)
+	if err != nil {
+		return nil // 更新已成功，仅加载失败
+	}
+	*pet = *loaded
+	return nil
 }
 
 func (s *PetService) Delete(id uint) error {

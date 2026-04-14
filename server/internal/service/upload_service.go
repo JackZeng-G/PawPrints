@@ -68,8 +68,11 @@ func (s *UploadService) Upload(file multipart.File, header *multipart.FileHeader
 		thumbURL = "" // 缩略图生成失败不阻止上传
 	}
 
+	// URL 使用正斜杠
+	urlPath := subDir + "/" + filename
+
 	return &UploadResult{
-		URL:          filepath.Join(subDir, filename),
+		URL:          urlPath,
 		ThumbnailURL: thumbURL,
 		Filename:     filename,
 	}, nil
@@ -93,7 +96,8 @@ func (s *UploadService) generateThumbnail(origPath, subDir, filename string) (st
 		return "", err
 	}
 
-	return filepath.Join("thumbs", subDir, filename), nil
+	// URL 使用正斜杠
+	return "thumbs/" + subDir + "/" + filename, nil
 }
 
 func saveImage(img image.Image, path string) error {

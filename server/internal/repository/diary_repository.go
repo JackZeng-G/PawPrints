@@ -28,6 +28,7 @@ func (r *DiaryRepository) List(petID uint, keyword string, page, pageSize int) (
 	if err := q.Offset(offset).Limit(pageSize).Order("entry_date DESC").Find(&entries).Error; err != nil {
 		return nil, 0, err
 	}
+	r.populatePetNames(entries)
 	return entries, total, nil
 }
 
@@ -36,10 +37,28 @@ func (r *DiaryRepository) GetByID(id uint) (*model.DiaryEntry, error) {
 	if err := r.DB.Preload("Photos").Preload("Pets").First(&entry, id).Error; err != nil {
 		return nil, err
 	}
+	r.populatePetNames([]model.DiaryEntry{entry})
 	return &entry, nil
 }
 
-func (r *DiaryRepository) Create(entry *model.DiaryEntry, petIDs []uint) error {
+func (r *DiaryRepository) populatePetNames(entries []model.DiaryEntry) {
+	petNames := make(map[uint]string)
+	for i := range entries {
+		for j := range entries[i].Pets {
+			pid := entries[i].Pets[j].PetID
+			if name, ok := petNames[pid]; ok {
+				entries[i].Pets[j].PetName = name
+			} else {
+				var name string
+				r.DB.Model(&model.Pet{}).Where("id = ?", pid).Select("name").Scan(&name)
+				petNames[pid] = name
+				entries[i].Pets[j].PetName = name
+			}
+		}
+	}
+}
+
+func (r *DiaryRepository) Create(entry *model.DiaryEntry, petIDs []uint, photos []model.DiaryPhoto) error {
 	tx := r.DB.Begin()
 	if err := tx.Create(entry).Error; err != nil {
 		tx.Rollback()
@@ -51,10 +70,17 @@ func (r *DiaryRepository) Create(entry *model.DiaryEntry, petIDs []uint) error {
 			return err
 		}
 	}
+	for i := range photos {
+		photos[i].DiaryEntryID = entry.ID
+		if err := tx.Create(&photos[i]).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
 	return tx.Commit().Error
 }
 
-func (r *DiaryRepository) Update(entry *model.DiaryEntry, petIDs []uint) error {
+func (r *DiaryRepository) Update(entry *model.DiaryEntry, petIDs []uint, photos []model.DiaryPhoto) error {
 	tx := r.DB.Begin()
 	if err := tx.Save(entry).Error; err != nil {
 		tx.Rollback()
@@ -63,6 +89,14 @@ func (r *DiaryRepository) Update(entry *model.DiaryEntry, petIDs []uint) error {
 	tx.Where("diary_entry_id = ?", entry.ID).Delete(&model.DiaryPet{})
 	for _, petID := range petIDs {
 		if err := tx.Create(&model.DiaryPet{DiaryEntryID: entry.ID, PetID: petID}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	tx.Where("diary_entry_id = ?", entry.ID).Delete(&model.DiaryPhoto{})
+	for i := range photos {
+		photos[i].DiaryEntryID = entry.ID
+		if err := tx.Create(&photos[i]).Error; err != nil {
 			tx.Rollback()
 			return err
 		}

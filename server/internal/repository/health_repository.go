@@ -17,7 +17,7 @@ func NewHealthRepository(db *gorm.DB) *HealthRepository {
 func (r *HealthRepository) List(petID uint, recordType string, page, pageSize int) ([]model.HealthRecord, int64, error) {
 	var records []model.HealthRecord
 	var total int64
-	q := r.DB.Model(&model.HealthRecord{})
+	q := r.DB.Model(&model.HealthRecord{}).Preload("Pet").Preload("Pet.Category").Preload("Pet.Breed")
 	if petID > 0 {
 		q = q.Where("pet_id = ?", petID)
 	}
@@ -35,6 +35,14 @@ func (r *HealthRepository) List(petID uint, recordType string, page, pageSize in
 func (r *HealthRepository) GetByID(id uint) (*model.HealthRecord, error) {
 	var record model.HealthRecord
 	if err := r.DB.First(&record, id).Error; err != nil {
+		return nil, err
+	}
+	return &record, nil
+}
+
+func (r *HealthRepository) GetByIDWithPet(id uint) (*model.HealthRecord, error) {
+	var record model.HealthRecord
+	if err := r.DB.Preload("Pet").Preload("Pet.Category").Preload("Pet.Breed").First(&record, id).Error; err != nil {
 		return nil, err
 	}
 	return &record, nil

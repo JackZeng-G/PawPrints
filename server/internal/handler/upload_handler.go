@@ -32,6 +32,12 @@ func (h *UploadHandler) Upload(c *gin.Context) {
 		return
 	}
 
+	// 返回完整 URL 路径
+	result.URL = "/api/upload/" + result.URL
+	if result.ThumbnailURL != "" {
+		result.ThumbnailURL = "/api/upload/" + result.ThumbnailURL
+	}
+
 	c.JSON(http.StatusOK, result)
 }
 

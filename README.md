@@ -125,3 +125,9 @@ thumbnail:
 ```bash
 cd server && go test ./tests/ -v
 ```
+
+## 许可证
+
+本项目基于 [GNU General Public License v3.0](LICENSE) 开源。
+
+简而言之：你可以自由使用、修改和分发本软件，但修改后的版本必须同样以 GPL-3.0 发布，并保留原作者的版权声明。详见 [LICENSE](LICENSE) 文件。

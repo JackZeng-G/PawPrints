@@ -22,11 +22,28 @@ func (s *HealthService) GetByID(id uint) (*model.HealthRecord, error) {
 }
 
 func (s *HealthService) Create(record *model.HealthRecord) error {
-	return s.Repo.Create(record)
+	if err := s.Repo.Create(record); err != nil {
+		return err
+	}
+	// 重新加载以包含关联数据
+	loaded, err := s.Repo.GetByIDWithPet(record.ID)
+	if err != nil {
+		return nil
+	}
+	*record = *loaded
+	return nil
 }
 
 func (s *HealthService) Update(record *model.HealthRecord) error {
-	return s.Repo.Update(record)
+	if err := s.Repo.Update(record); err != nil {
+		return err
+	}
+	loaded, err := s.Repo.GetByIDWithPet(record.ID)
+	if err != nil {
+		return nil
+	}
+	*record = *loaded
+	return nil
 }
 
 func (s *HealthService) Delete(id uint) error {

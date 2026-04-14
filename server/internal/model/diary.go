@@ -16,9 +16,10 @@ type DiaryEntry struct {
 }
 
 type DiaryPet struct {
-	ID           uint `gorm:"primaryKey" json:"id"`
-	DiaryEntryID uint `gorm:"not null;index" json:"diary_entry_id"`
-	PetID        uint `gorm:"not null;index" json:"pet_id"`
+	ID           uint   `gorm:"primaryKey" json:"id"`
+	DiaryEntryID uint   `gorm:"not null;index" json:"diary_entry_id"`
+	PetID        uint   `gorm:"not null;index" json:"pet_id"`
+	PetName      string `gorm:"-" json:"pet_name"`
 }
 
 type DiaryPhoto struct {
@@ -27,6 +28,7 @@ type DiaryPhoto struct {
 	PhotoURL     string `gorm:"size:255;not null" json:"photo_url"`
 	ThumbnailURL string `gorm:"size:255" json:"thumbnail_url"`
 	SortOrder    int    `gorm:"default:0" json:"sort_order"`
+	EntryDate    string `gorm:"-" json:"entry_date"`
 }
 
 func (DiaryEntry) TableName() string { return "diary_entries" }
