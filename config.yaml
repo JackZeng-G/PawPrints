@@ -1,0 +1,12 @@
+server:
+  port: 8080
+  upload_dir: ./uploads
+  max_upload_size: 10MB
+
+database:
+  path: ./data/pawprints.db
+
+thumbnail:
+  max_width: 400
+  max_height: 400
+  quality: 80
