@@ -14,10 +14,11 @@ func NewDiaryService(repo *repository.DiaryRepository) *DiaryService {
 }
 
 type CreateDiaryInput struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	Mood    string `json:"mood"`
-	PetIDs  []uint `json:"pet_ids"`
+	Title     string          `json:"title"`
+	Content   string          `json:"content"`
+	Mood      string          `json:"mood"`
+	EntryDate model.DateOnly  `json:"entry_date"`
+	PetIDs    []uint          `json:"pet_ids"`
 }
 
 func (s *DiaryService) List(petID uint, keyword string, page, pageSize int) ([]model.DiaryEntry, int64, error) {
@@ -30,9 +31,10 @@ func (s *DiaryService) GetByID(id uint) (*model.DiaryEntry, error) {
 
 func (s *DiaryService) Create(input CreateDiaryInput) (*model.DiaryEntry, error) {
 	entry := &model.DiaryEntry{
-		Title:   input.Title,
-		Content: input.Content,
-		Mood:    input.Mood,
+		Title:     input.Title,
+		Content:   input.Content,
+		Mood:      input.Mood,
+		EntryDate: input.EntryDate,
 	}
 	if err := s.Repo.Create(entry, input.PetIDs); err != nil {
 		return nil, err
@@ -48,6 +50,7 @@ func (s *DiaryService) Update(id uint, input CreateDiaryInput) (*model.DiaryEntr
 	entry.Title = input.Title
 	entry.Content = input.Content
 	entry.Mood = input.Mood
+	entry.EntryDate = input.EntryDate
 	if err := s.Repo.Update(entry, input.PetIDs); err != nil {
 		return nil, err
 	}

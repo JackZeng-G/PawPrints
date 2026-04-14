@@ -10,8 +10,8 @@ type HealthRecord struct {
 	Value       float64    `json:"value"`
 	Unit        string     `gorm:"size:20" json:"unit"`
 	Notes       string     `gorm:"type:text" json:"notes"`
-	RecordDate  time.Time  `gorm:"not null;index" json:"record_date"`
-	NextDueDate *time.Time `gorm:"index" json:"next_due_date"`
+	RecordDate  DateOnly   `gorm:"not null;index" json:"record_date"`
+	NextDueDate *DateOnly  `gorm:"index" json:"next_due_date"`
 	VetName     string     `gorm:"size:100" json:"vet_name"`
 	ClinicName   string     `gorm:"size:200" json:"clinic_name"`
 	Medication  string     `gorm:"type:text" json:"medication"`

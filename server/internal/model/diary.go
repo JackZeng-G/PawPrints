@@ -6,7 +6,7 @@ type DiaryEntry struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Title     string    `gorm:"size:200;not null" json:"title"`
 	Content   string    `gorm:"type:text" json:"content"`
-	EntryDate time.Time `gorm:"not null;index" json:"entry_date"`
+	EntryDate DateOnly  `gorm:"not null;index" json:"entry_date"`
 	Mood      string    `gorm:"size:20" json:"mood"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
