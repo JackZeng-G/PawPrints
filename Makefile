@@ -5,11 +5,11 @@ dev:
 	@echo "Starting backend..."
 	cd server && go run ./cmd/app/ & \
 	echo "Starting frontend dev server..." && \
-	cd web && npm run dev
+	cd web && pnpm run dev
 
 # 构建前端并复制到 embed 目录
 build-fe:
-	cd web && npm run build
+	cd web && pnpm run build
 	rm -rf server/pkg/embedfs/dist/assets
 	cp -r web/dist/* server/pkg/embedfs/dist/
 

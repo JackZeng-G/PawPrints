@@ -1,10 +1,10 @@
 # Build stage
 FROM node:22-alpine AS frontend
 WORKDIR /app/web
-COPY web/package*.json ./
-RUN npm ci
+COPY web/package.json web/pnpm-lock.yaml ./
+RUN npm i -g pnpm@12.6.0 && pnpm install --frozen-lockfile
 COPY web/ ./
-RUN npm run build
+RUN pnpm run build
 
 FROM golang:1.24-alpine AS builder
 WORKDIR /app

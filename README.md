@@ -49,7 +49,7 @@ docker compose up -d
 cd server && go run ./cmd/app/
 
 # 前端（另一个终端）
-cd web && npm install && npm run dev
+cd web && pnpm install && pnpm run dev
 ```
 
 前端开发服务器 http://localhost:5173，自动代理 `/api` 到后端 8080。
