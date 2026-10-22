@@ -6,7 +6,7 @@ RUN npm i -g pnpm@12.6.0 && pnpm install --frozen-lockfile
 COPY web/ ./
 RUN pnpm run build
 
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26.10-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache git
 COPY server/go.mod server/go.sum* ./
